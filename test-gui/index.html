@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Grid with Svelte TypeScript</title>
+    </head>
+    <body>
+        <div id="gridContainer" style="height: 600px;"></div>
+        <link href="../build/css/style.css" rel="stylesheet">
+        <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+        <script type="text/javascript" src="papaparse.min.js"></script>
+        <script type="text/javascript" src="../build/grid.js"></script>
+        <script>
+            Papa.parse('SalesOrderDetails.csv', {
+                download: true,                
+                complete: function(results) {                    
+                    const schema = [{
+                        'name': 'OrderID',
+                        'type': 'number'
+                    }, {
+                        'name': 'Product Name'
+                    }, {
+                        'name' : 'Supplier Name'
+                    }, {
+                        'name' : 'Category Name'
+                    }, {
+                        'name' : 'Customer Name'
+                    }, {
+                        'name' : 'Customer City'
+                    }, {
+                        'name' : 'Customer Country'
+                    }, {
+                        'name' : 'Customer Continent'
+                    }, {
+                        'name' : 'Employee Name'
+                    }, {
+                        'name' : 'Employee Designation'
+                    }, {
+                        'name' : 'OrderDate',
+                        'type': 'date',
+                        'format': '%m/%d/%y %H:%M'
+                    }, {
+                        'name' : 'Total Purchase Amount',
+                        'type': 'number'
+                    }];                    
+                    const data = results.data.slice(1);
+                    const dataStore = new FusionCharts.DataStore();                    
+                    const rootDataTable = dataStore.createDataTable(data, schema, {
+                        enableIndex: true,
+                        indexBy: 'OrderID'
+                    });                    
+                    console.log(rootDataTable.getData());
+
+                    let operation = FusionCharts.DataStore.Operators.equals('Customer City', 'Albuquerque');
+
+                    const derivedDataTable = rootDataTable.query(operation);
+                    console.log(derivedDataTable.getData());
+
+                    let grid = new MyGrid.Grid(document.getElementById('gridContainer'), derivedDataTable, {
+                        name: 'World'
+                    });
+                    let globalSearch = new MyGrid.GlobalSearch();
+                    grid.addModule(globalSearch);
+                    let globalSort = new MyGrid.GlobalSort();
+                    grid.addModule(globalSort);
+                    let pagination = new MyGrid.Pagination();
+                    grid.addModule(pagination);
+                    grid.render();
+                }
+            });            
+        </script>
+  </body>
+</html>
